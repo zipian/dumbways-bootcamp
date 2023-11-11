@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dumbmerch-production
+  labels:
+    env: production
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      env: production
+  template:
+    metadata:
+      labels:
+        env: production
+    spec:
+      containers:
+      - name: frontend
+        image: zipian/fe-dumbmerch-gke:production
+        ports:
+        - containerPort: 3000
+      - name: backend
+        image: zipian/be-dumbmerch-gke:production
+        ports:
+        - containerPort: 5000

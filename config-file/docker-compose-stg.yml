@@ -1,0 +1,15 @@
+version: "3.8"
+services:
+  frontend:
+    image: zipian/fe-dumbmerch:staging
+    container_name: fe-dm-stg
+    stdin_open: true
+    ports:
+      - 3005:80
+
+  backend:
+    image: zipian/be-dumbmerch:staging
+    container_name: be-dm-stg
+    stdin_open: true
+    ports:
+      - 5005:5000

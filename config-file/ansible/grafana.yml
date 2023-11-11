@@ -1,0 +1,26 @@
+- become: true
+  gather_facts: false
+  hosts: appserver
+  tasks:
+   - name: "Make directory grafana"
+     ansible.builtin.file:
+       path: /home/{{username}}/grafana
+       state: directory
+       mode: "0775"
+   - name: "Pull Grafana image"
+     docker_image:
+       name: grafana/grafana
+       tag: latest
+       source: pull
+   - name: "Run Grafana container"
+     docker_container:
+       name: grafana
+       image: grafana/grafana:latest
+       ports:
+         - 3001:3000
+       volumes:
+         - /home/{{username}}/grafana:/var/lib/grafana
+       state: started
+
+  vars:
+   - username: "alfiansy"

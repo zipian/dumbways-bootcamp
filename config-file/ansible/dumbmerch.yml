@@ -1,0 +1,23 @@
+- become: true
+  become_user: "{{username}}"
+  gather_facts: false
+  hosts: appserver
+  tasks:
+   - name: "Copy private key"
+     copy:
+       src: "/home/zipian/.ssh/id_rsa"
+       dest: "/home/{{username}}/.ssh/id_rsa"
+       mode: "0700"
+   - name: "Git pull fe-dumbmerch"
+     git:
+       repo: "git@gitlab.com:zversion/fe-dumbmerch.git"
+       dest: "/home/{{username}}/fe-dumbmerch"
+   - name: "Git pull be-dumbmerch"
+     git:
+       repo: "git@gitlab.com:zversion/be-dumbmerch.git"
+       dest: "/home/{{username}}/be-dumbmerch"
+
+  vars:
+   - username: "alfiansy"
+  environment:
+    GIT_SSH_COMMAND: "/usr/bin/ssh -o StrictHostKeyChecking=no"

@@ -1,0 +1,44 @@
+- become: true
+  gather_facts: false
+  hosts: all
+  tasks:
+   - name: "Install docker - Prerequisites"
+     apt:
+       update_cache: true
+       name:
+         - apt-transport-https
+         - software-properties-common
+         - ca-certificates
+         - curl
+         - gnupg
+         - lsb-release
+         - python3-pip
+   - name: "Install docker - GPG key"
+     apt_key:
+       url: "https://download.docker.com/linux/ubuntu/gpg"
+   - name: "Install docker - Add repository"
+     apt_repository:
+       repo: "deb https://download.docker.com/linux/ubuntu focal stable"
+       state: present
+   - name: "Install docker - Engine"
+     apt:
+       update_cache: true
+       name:
+         - docker-ce
+         - docker-ce-cli
+         - containerd.io
+         - docker-buildx-plugin
+         - docker-compose-plugin
+   - name: "Install docker - SDK for Python"
+     pip:
+       name:
+         - docker
+         - docker-compose
+   - name: "Add user to docker group"
+     user:
+       name: "{{username}}"
+       groups: docker
+       append: true
+
+  vars:
+   - username: "alfiansy"

@@ -1,0 +1,40 @@
+- become: true
+  become_user: "{{username}}"
+  gather_facts: false
+  hosts: appserver
+  tasks:
+   - name: "Make directory prometheus"
+     file:
+       path: /home/{{username}}/prometheus
+       state: directory
+   - name: "Config Prometheus"
+     copy:
+       content: |
+         global:
+
+         scrape_configs:
+          - job_name: 'dumbmerch'
+            scrape_interval: 5s
+            static_configs:
+              - targets: [
+                  "10.138.0.2:9100", 
+                  "10.138.0.3:9100",
+                  ]
+       dest: /home/{{username}}/prometheus/prometheus.yml
+   - name: "Pull Prometheus image"
+     docker_image:
+       name: bitnami/prometheus
+       tag: latest
+       source: pull
+   - name: "Run Prometheus container"
+     docker_container:
+       name: prometheus
+       image: bitnami/prometheus:latest
+       ports:
+         - 9090:9090
+       volumes:
+         - /home/{{username}}/prometheus/prometheus.yml:/opt/bitnami/prometheus/conf/prometheus.yml
+       state: started
+
+  vars:
+   - username: "alfiansy"

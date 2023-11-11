@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dumbmerch-staging
+  labels:
+    env: staging
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      env: staging
+  template:
+    metadata:
+      labels:
+        env: staging
+    spec:
+      containers:
+      - name: frontend
+        image: zipian/fe-dumbmerch:staging
+        ports:
+        - containerPort: 80
+      - name: backend
+        image: zipian/be-dumbmerch:staging
+        ports:
+        - containerPort: 5000

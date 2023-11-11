@@ -1,0 +1,16 @@
+- become: true
+  gather_facts: false
+  hosts: all
+  tasks:
+   - name: "Pull Node-Exporter image"
+     docker_image:
+       name: bitnami/node-exporter
+       tag: latest
+       source: pull
+   - name: "Run Node-Exporter container"
+     docker_container:
+       name: node-exporter
+       image: bitnami/node-exporter:latest
+       ports:
+         - 9100:9100
+       state: started

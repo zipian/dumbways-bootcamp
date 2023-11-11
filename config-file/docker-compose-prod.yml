@@ -1,0 +1,17 @@
+version: "3.8"
+services:
+  frontend:
+    image: zipian/fe-dumbmerch:production
+    container_name: fe-dm-prod
+    stdin_open: true
+    restart: always
+    ports:
+      - 3000:3000
+
+  backend:
+    image: zipian/be-dumbmerch:production
+    container_name: be-dm-prod
+    stdin_open: true
+    restart: always
+    ports:
+      - 5000:5000

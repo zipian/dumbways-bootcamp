@@ -1,0 +1,42 @@
+stages:
+  - build
+  - deploy
+
+variables:
+  DOCKER_NAME: "zipian"
+  DOCKER_IMAGE: "fe-dumbmerch"
+
+image-build:
+  stage: build
+  image: docker:1.11
+  services:
+    - docker:dind
+  script:
+    - export DOCKER_HOST=tcp://docker:2375/
+    - apk add --update git
+    # Repo pull
+    - git pull origin $CI_COMMIT_REF_NAME
+    # Image build
+    - docker build --build-arg REACT_APP_BASEURL=https://api.al.studentdumbways.my.id/api/v1 -t $DOCKER_NAME/$DOCKER_IMAGE:$CI_COMMIT_REF_NAME .
+    # Image push
+    - docker login -u zipian -p $PASS_DOCKER
+    - docker push $DOCKER_NAME/$DOCKER_IMAGE:$CI_COMMIT_REF_NAME
+
+deploy-app:
+  stage: deploy
+  before_script:
+    - 'command -v ssh-agent >/dev/null || ( apk add --update openssh )' 
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan $VM_ADDRESS >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+  script:
+    # Running image container
+    - ssh $SSH_USER@$VM_ADDRESS "docker pull $DOCKER_NAME/$DOCKER_IMAGE:$CI_COMMIT_REF_NAME"
+    - ssh $SSH_USER@$VM_ADDRESS "cd ~/$CI_COMMIT_REF_NAME/ && docker compose up -d"
+
+
+
+

@@ -1,0 +1,33 @@
+stages:
+  - build
+  - deploy
+
+variables:
+  DOCKER_NAME: "zipian"
+  DOCKER_IMAGE: "fe-dumbmerch-gke"
+  URL_API: "http://35.184.87.103:8080/api/v1"
+
+image-build:
+  stage: build
+  image: docker:1.11
+  services:
+    - docker:dind
+  script:
+    - export DOCKER_HOST=tcp://docker:2375/
+    - apk add --update git
+    # Repo pull
+    - git pull origin $CI_COMMIT_REF_NAME
+    # Image build
+    - docker build --build-arg REACT_APP_BASEURL=$URL_API -t $DOCKER_NAME/$DOCKER_IMAGE:$CI_COMMIT_REF_NAME .
+    # Image push
+    - docker login -u zipian -p $PASS_DOCKER
+    - docker push $DOCKER_NAME/$DOCKER_IMAGE:$CI_COMMIT_REF_NAME
+
+deploy-app:
+  image: google/cloud-sdk
+  stage: deploy
+  before_script:
+    - gcloud auth activate-service-account --key-file=$GCLOUD_KEY_FILE
+    - gcloud container clusters get-credentials my-cluster --zone us-central1-a --project dumbways-402405
+  script:
+    - kubectl apply -f deployment.yml

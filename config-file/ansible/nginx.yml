@@ -1,0 +1,51 @@
+- become: true
+  gather_facts: false
+  hosts: gateway
+  tasks:
+   - name: "Make directory nginx/ssl"
+     file:
+       path: /home/{{username}}/nginx/ssl
+       state: directory
+   - name: "Config nginx"
+     copy:
+       content: |
+         server {
+          server_name al.studentdumbways.my.id;
+
+          location / {
+           proxy_pass http://10.138.0.2:3000;
+          }
+          listen 443 ssl;
+          ssl_certificate /etc/letsencrypt/live/al.studentdumbways.my.id/fullchain.pem; 
+          ssl_certificate_key /etc/letsencrypt/live/al.studentdumbways.my.id/privkey.pem;
+         }
+         server {
+          server_name api.al.studentdumbways.my.id;
+
+          location / {
+           proxy_pass http://10.138.0.2:5000;
+          }
+          listen 443 ssl;
+          ssl_certificate /etc/letsencrypt/live/al.studentdumbways.my.id/fullchain.pem; 
+          ssl_certificate_key /etc/letsencrypt/live/al.studentdumbways.my.id/privkey.pem;
+         }
+       dest: /home/{{username}}/nginx/dumbmerch.conf
+   - name: "Pull Nginx image"
+     docker_image:
+       name: nginx
+       tag: latest
+       source: pull
+   - name: "Run Nginx container"
+     docker_container:
+       name: nginx
+       image: nginx:latest
+       ports:
+         - 80:80
+         - 443:443
+       volumes:
+         - /home/{{username}}/nginx/dumbmerch.conf:/etc/nginx/sites-enabled/dumbmerch.conf
+         - /home/{{username}}/nginx/ssl:/etc/letsencrypt/live/al.studentdumbways.my.id
+       state: started
+
+  vars:
+   - username: "alfiansy"

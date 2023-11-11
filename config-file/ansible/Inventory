@@ -1,0 +1,9 @@
+[appserver]
+34.83.243.96
+
+[gateway]
+34.83.98.204
+
+[all:vars]
+ansible_connection=ssh
+ansible_user=alfiansy
